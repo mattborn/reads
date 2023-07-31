@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap');
+
+/* cascade */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  font: 100%/1 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  text-rendering: optimizeLegibility;
+}
+
+/* header */
+
+header {
+  align-items: center;
+  display: flex;
+  padding: 0 1rem;
+}
+
+.brand {
+  color: inherit;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+/* layout */
+
+.fill {
+  flex: 1;
+}
+
+/* account tile */
+
+#account {
+  display: flex;
+  font-size: 14px;
+  gap: 12px;
+  line-height: 20px;
+  padding: 12px;
+}
+#account img {
+  border-radius: 20px;
+  height: 2.5rem;
+  width: 2.5rem;
+}

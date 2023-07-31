@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Subsurf MVP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.js"></script>
+    <script defer src="https://kit.fontawesome.com/0bef9420dc.js" crossorigin="anonymous"></script>
+    <script defer src="https://unpkg.com/marked/marked.min.js"></script>
+    <script defer src="https://unpkg.com/scrollreveal@4.0.7"></script>
+    <script defer src="scripts.js"></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/">subsurf</a>
+      <div class="fill"></div>
+      <div id="account">
+        <img alt="avatar" src="https://placehold.co/40" />
+        <div>
+          <b id="account-name"></b>
+          <div id="account-id"></div>
+        </div>
+      </div>
+    </header>
+    <div id="firebase-ui-auth"></div>
+    <div>list</div>
+    <div>contents (sections)</div>
+    <div>global form</div>
+    <div>global stats (summary, progress, ai vs. human)</div>
+    <div>form (edit inputs, edit outputs)</div>
+    <div>preview</div>
+  </body>
+</html>
