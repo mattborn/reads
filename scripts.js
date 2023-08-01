@@ -18,9 +18,6 @@ const insert = (target = document.body, tag = 'div') => {
   return el
 }
 
-const account = insert()
-account.id = 'account'
-
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     if (user.isAnonymous) {
@@ -39,11 +36,7 @@ firebase.auth().onAuthStateChanged(user => {
     const signOut = insert(g('account'), 'button')
     signOut.textContent = 'Sign out'
     signOut.addEventListener('click', e => {
-      firebase
-        .auth()
-        .signOut()
-        .then(() => (g('account').textContent = ''))
-        .catch(console.error)
+      firebase.auth().signOut().catch(console.error)
     })
   } else {
     const ui = new firebaseui.auth.AuthUI(firebase.auth())
@@ -56,30 +49,23 @@ firebase.auth().onAuthStateChanged(user => {
       ],
     })
 
-    // don’t do this, yet
-    // firebase
-    //   .auth()
-    //   .signInAnonymously()
-    //   .then(() => initRootUser(user))
-    //   .catch(console.error)
+    const anonButton = insert(g('firebase-ui-auth'), 'button')
+    anonButton.textContent = 'Continue anonymously'
+    anonButton.addEventListener('click', e => {
+      firebase.auth().signInAnonymously().catch(console.error)
+    })
   }
 })
 
 const database = firebase.database()
-// const saveData = data => {
-//   database
-//     .ref('starter')
-//     .push(data)
-//     .then(() => console.log('Data written to Realtime Database successfully!'))
-//     .catch(error => console.error('Error writing data to Realtime Database:', error))
-// }
 
 const initRootUser = user => {
+  console.log('initRootUser', user)
   // add or update user profile
   const { displayName, email, emailVerified, isAnonymous, photoURL, phoneNumber, providerData } = user
   const { creationTime, lastSignInTime } = user.metadata
-  database
-    .ref(`users/${user.uid}`)
+  const userRef = database.ref(`users/${user.uid}`)
+  userRef
     .update({
       creationTime,
       displayName,
@@ -93,35 +79,154 @@ const initRootUser = user => {
     })
     .catch(console.error)
 
+  userRef.child('apps').update({ subsurf: true })
+
   initSubsurf(user)
 }
 
 const initSubsurf = user => {
-  const subsurfRef = database.ref(`subsurf/${user.uid}`)
+  database.ref(`subsurf/${user.uid}`).on('value', snapshot => {
+    const versions = snapshot.val() || []
+    g('list').innerHTML = '' // clear list
+    console.log(Object.values(versions))
+    const versionNumbers = {}
+    Object.values(versions)
+      .sort((a, b) => b.created - a.created)
+      .forEach((v, i) => {
+        const business_name = v.business_name || 'Untitled'
 
-  subsurfRef
+        // If the business name hasn't been seen before, initialize its version number
+        if (!versionNumbers[business_name]) versionNumbers[business_name] = 1
+        const version = insert(g('list'))
+        version.className = 'version'
+        const version_name = insert(version)
+        version_name.className = 'version-name'
+        version_name.textContent = `${business_name} ${versionNumbers[business_name]}`
+        versionNumbers[business_name]++
+        version.addEventListener('click', e => {
+          // highlight active
+          q('.version').forEach(el => el.classList.remove('active'))
+          version.classList.add('active')
+          // hydrate form
+          g('business_name').value = business_name
+          g('business_name').dispatchEvent(new Event('input', { bubbles: true }))
+          g('base_prompt').value = v.base_prompt
+          g('base_prompt').dispatchEvent(new Event('input', { bubbles: true }))
+          // hydrate preview
+          g('headline').textContent = v.headline
+          g('lede').textContent = v.lede
+
+          g('services').innerHTML = ''
+          v.services.split(',').forEach(s => {
+            const li = insert(g('services'), 'li')
+            li.textContent = s
+          })
+          g('services_h2').textContent = v.services_h2
+        })
+        if (!i) version.click()
+      })
+  })
+
+  renderGenerateButton(user)
+}
+
+/* loadPreview?
+
+  const projectRef = database.ref(`subsurf/${user.uid}/${projectId}`);
+  projectRef
     .once('value')
     .then(snapshot => {
-      if (!snapshot.exists()) {
-        const firstProject = {
-          name: 'untitled',
-          basePrompt: '',
-          versions: [],
-        }
-
-        subsurfRef
-          .set([firstProject])
-          .then(() => {
-            console.log('First project created')
-          })
-          .catch(console.error)
-      } else {
-        renderList(snapshot.val())
-      }
+      const project = snapshot.val();
+      // Code to render the preview for the project using the project data
     })
-    .catch(console.error)
+    .catch(console.error);
+
+*/
+
+// depends on user object
+const renderGenerateButton = user => {
+  const generateButton = insert(g('actions'), 'button')
+  generateButton.textContent = 'Generate'
+  generateButton.addEventListener('click', e => {
+    const business_name = g('business_name').value
+    const base_prompt = g('base_prompt').value
+    generateButton.disabled = true
+    document.body.classList.add('loading')
+
+    const userRef = database.ref(`subsurf/${user.uid}`)
+    // get next version number
+    let version = 1
+    userRef
+      .orderByChild('business_name')
+      .equalTo(business_name)
+      .limitToLast(1)
+      .once('value')
+      .then(snapshot => {
+        console.log(snapshot.val())
+      })
+
+    try {
+      turbo([
+        {
+          role: 'system',
+          content: `Generate content for a website about ${base_prompt}`,
+        },
+        {
+          role: 'user',
+          content: `Return a single JSON object copying this schema: ${JSON.stringify({
+            color: 'hex value for trendy, relevant light brand color',
+            headline: 'clever, pithy headline to be displayed in large bold type at top of home page',
+            lede: ' lede immediately after headline',
+            services: 'a comma-delimited list of 12 relevant services',
+            services_h2: 'repeat three services each as one word as a list ending with and more',
+          })} and use the values as hints.`,
+        },
+      ]).then(text => {
+        const json = toJSON(text)
+        const { color, headline, lede, services, services_h2 } = json
+        userRef.push({ base_prompt, business_name, color, created: Date.now(), headline, lede, services, services_h2 })
+        generateButton.disabled = false
+        document.body.classList.remove('loading')
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  })
 }
 
-const renderList = projects => {
-  console.log('PROJECTS: ', projects)
+// manage
+
+const turbo = async messages => {
+  console.log('Fetching data…', messages)
+  const response = await fetch(`https://us-central1-samantha-374622.cloudfunctions.net/turbo`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(messages),
+  })
+  return response.text()
 }
+
+const toJSON = str => {
+  const curly = str.indexOf('{')
+  const square = str.indexOf('[')
+  let first
+  if (curly < 0) first = '[' // only for empty arrays
+  else if (square < 0) first = '{'
+  else first = curly < square ? '{' : '['
+  const last = first === '{' ? '}' : ']'
+  // ensure JSON is complete
+  let count = 0
+  for (const c of str) {
+    if (c === '{' || c === '[') count++
+    else if (c === '}' || c === ']') count--
+  }
+  if (!count) return JSON.parse(str.slice(str.indexOf(first), str.lastIndexOf(last) + 1))
+}
+
+// temporary client-side DOM edits, needs SSR
+
+g('business_name').addEventListener('input', e => {
+  q('section .brand').forEach(el => (el.textContent = e.currentTarget.value))
+})

@@ -28,11 +28,45 @@
       </div>
     </header>
     <div id="firebase-ui-auth"></div>
-    <div>list</div>
-    <div>contents (sections)</div>
-    <div>global form</div>
-    <div>global stats (summary, progress, ai vs. human)</div>
-    <div>form (edit inputs, edit outputs)</div>
-    <div>preview</div>
+    <div id="app">
+      <div id="list"></div>
+      <div id="form">
+        <h5>Inputs</h5>
+        <label for="business_name">Business name</label>
+        <input id="business_name" placeholder="Brand" />
+        <label for="base_prompt">Describe your idea</label>
+        <textarea id="base_prompt" placeholder="Base prompt"></textarea>
+        <!-- <div>global stats (summary, progress, ai vs. human)</div>
+        <div>section by section forms (edit inputs, edit outputs)</div> -->
+        <div id="actions"></div>
+      </div>
+      <div id="preview">
+        <h5>Preview</h5>
+        <h3>Hero*</h3>
+        <section class="center">
+          <div class="brand">Brand</div>
+          <h1 id="headline">Headline</h1>
+          <p id="lede">Lede</p>
+          <button>See plans</button>
+          <img alt="image" src="https://placehold.co/512" />
+        </section>
+        <h3>Services</h3>
+        <section class="center">
+          <div class="small-caps">Services</div>
+          <h2 id="services_h2">So, much, value, and more</h2>
+          <ul id="services"></ul>
+        </section>
+        <h3>Pricing</h3>
+        <section class="center">
+          <div class="small-caps">Pricing</div>
+          <h2>Membership levels</h2>
+        </section>
+        <h3>Footer</h3>
+        <section class="center">
+          <div class="brand">Brand</div>
+          <p>is headquartered on planet Earth.</p>
+        </section>
+      </div>
+    </div>
   </body>
 </html>
