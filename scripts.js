@@ -39,6 +39,7 @@ firebase.auth().onAuthStateChanged(user => {
       firebase.auth().signOut().catch(console.error)
     })
   } else {
+    document.body.classList.add('hide-app')
     const ui = new firebaseui.auth.AuthUI(firebase.auth())
     ui.start('#firebase-ui-auth', {
       signInSuccessUrl: '/',
@@ -60,7 +61,7 @@ firebase.auth().onAuthStateChanged(user => {
 const database = firebase.database()
 
 const initRootUser = user => {
-  console.log('initRootUser', user)
+  // console.log('initRootUser', user)
   // add or update user profile
   const { displayName, email, emailVerified, isAnonymous, photoURL, phoneNumber, providerData } = user
   const { creationTime, lastSignInTime } = user.metadata
@@ -88,21 +89,17 @@ const initSubsurf = user => {
   database.ref(`subsurf/${user.uid}`).on('value', snapshot => {
     const versions = snapshot.val() || []
     g('list').innerHTML = '' // clear list
-    console.log(Object.values(versions))
-    const versionNumbers = {}
+    // console.log(Object.values(versions))
     Object.values(versions)
       .sort((a, b) => b.created - a.created)
       .forEach((v, i) => {
         const business_name = v.business_name || 'Untitled'
 
-        // If the business name hasn't been seen before, initialize its version number
-        if (!versionNumbers[business_name]) versionNumbers[business_name] = 1
         const version = insert(g('list'))
         version.className = 'version'
         const version_name = insert(version)
         version_name.className = 'version-name'
-        version_name.textContent = `${business_name} ${versionNumbers[business_name]}`
-        versionNumbers[business_name]++
+        version_name.textContent = `${business_name} ${v.version}`
         version.addEventListener('click', e => {
           // highlight active
           q('.version').forEach(el => el.classList.remove('active'))
@@ -130,19 +127,6 @@ const initSubsurf = user => {
   renderGenerateButton(user)
 }
 
-/* loadPreview?
-
-  const projectRef = database.ref(`subsurf/${user.uid}/${projectId}`);
-  projectRef
-    .once('value')
-    .then(snapshot => {
-      const project = snapshot.val();
-      // Code to render the preview for the project using the project data
-    })
-    .catch(console.error);
-
-*/
-
 // depends on user object
 const renderGenerateButton = user => {
   const generateButton = insert(g('actions'), 'button')
@@ -162,7 +146,10 @@ const renderGenerateButton = user => {
       .limitToLast(1)
       .once('value')
       .then(snapshot => {
-        console.log(snapshot.val())
+        snapshot.forEach(child => {
+          const match = child.val()
+          version = (match.version || 0) + 1
+        })
       })
 
     try {
@@ -184,7 +171,17 @@ const renderGenerateButton = user => {
       ]).then(text => {
         const json = toJSON(text)
         const { color, headline, lede, services, services_h2 } = json
-        userRef.push({ base_prompt, business_name, color, created: Date.now(), headline, lede, services, services_h2 })
+        userRef.push({
+          base_prompt,
+          business_name,
+          color,
+          created: Date.now(),
+          headline,
+          lede,
+          services,
+          services_h2,
+          version,
+        })
         generateButton.disabled = false
         document.body.classList.remove('loading')
       })
@@ -197,7 +194,7 @@ const renderGenerateButton = user => {
 // manage
 
 const turbo = async messages => {
-  console.log('Fetching data…', messages)
+  // console.log('Fetching data…', messages)
   const response = await fetch(`https://us-central1-samantha-374622.cloudfunctions.net/turbo`, {
     method: 'POST',
     headers: {

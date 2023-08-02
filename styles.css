@@ -155,6 +155,9 @@ header {
   flex: 1;
 }
 
+.hide-app #app {
+  display: none;
+}
 #app {
   display: flex;
 }
@@ -164,6 +167,14 @@ header {
   gap: 1rem;
   min-width: 15rem;
   padding: 2rem;
+}
+
+#list,
+#form {
+  max-height: 100vh;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
 }
 
 #preview {
@@ -220,17 +231,19 @@ section {
   color: #07f;
 }
 
-ul {
+/* preview */
+
+#preview ul {
   list-style-type: none;
   padding: 0;
 }
-li {
+#preview li {
   align-items: start;
   display: flex;
   gap: 1rem;
   margin: 0 0 8px;
 }
-li::before {
+#preview li::before {
   content: '\f00c';
   font: 400 12px/1rem 'Font Awesome 6 Pro';
 }
