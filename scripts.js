@@ -113,6 +113,9 @@ const initSubsurf = user => {
           g('headline').textContent = v.headline
           g('lede').textContent = v.lede
 
+          setCSS(`#preview { color: ${v.color}; }
+          button, .badge, #footer { background: ${v.color}; }`)
+
           g('services').innerHTML = ''
           v.services.split(',').forEach(s => {
             const li = insert(g('services'), 'li')
@@ -227,3 +230,6 @@ const toJSON = str => {
 g('business_name').addEventListener('input', e => {
   q('section .brand').forEach(el => (el.textContent = e.currentTarget.value))
 })
+
+const style = insert(document.head, 'style')
+const setCSS = css => (style.innerHTML = css)

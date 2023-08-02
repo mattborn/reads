@@ -8,6 +8,7 @@
 
 body {
   -webkit-font-smoothing: antialiased;
+  color: #111;
   font: 500 100%/1 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   margin: 0;
   text-rendering: optimizeLegibility;
@@ -118,14 +119,14 @@ textarea {
   text-rendering: inherit;
 }
 button {
-  background: #000;
+  background: #111;
   color: #fff;
   cursor: pointer;
   padding: 1rem 1.5rem;
 }
 input,
 textarea {
-  border: 1px solid #0002;
+  border: 1px solid #1112;
   padding: 8px;
 }
 textarea {
@@ -184,7 +185,7 @@ header {
 
 section {
   background: #fff;
-  border-radius: 1.5rem;
+  border-radius: 1rem;
   padding: 4rem;
 }
 
@@ -261,4 +262,108 @@ section {
   font-weight: 700;
   padding: 1rem;
   text-align: left;
+}
+
+#footer {
+  background: #111;
+  color: #fff;
+}
+
+/* pricing (copied from opswise.co) */
+
+#pricing {
+  background: #f8f8f8;
+}
+
+.smallcaps {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+#plans {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  margin: 0 auto;
+  max-width: 1024px;
+}
+.plan {
+  align-items: flex-start;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 20rem;
+  gap: 2rem;
+  padding: 2rem;
+  position: relative;
+  text-align: left;
+}
+
+.badge {
+  background: #111;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  left: 1rem;
+  letter-spacing: 0.1em;
+  line-height: 16px;
+  padding: 8px 12px;
+  position: absolute;
+  text-transform: uppercase;
+  top: -1rem;
+  transform: rotate(-3deg);
+}
+
+h4 {
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+  line-height: 2rem;
+  margin: 0 0 8px;
+}
+small {
+  opacity: 0.5;
+}
+
+.actions {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.plan .button {
+  padding: 1.5rem;
+  width: 100%;
+}
+a {
+  color: inherit;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  align-items: start;
+  display: flex;
+  gap: 1rem;
+  margin: 0 0 8px;
+}
+li::before {
+  content: '\f00c';
+  font: 400 12px/1.5rem 'Font Awesome 6 Pro';
+}
+
+.fa-comments-alt {
+  font-size: 4rem;
+}
+
+img {
+  margin: 0 auto;
+  max-width: 40rem;
 }
