@@ -112,6 +112,7 @@ const initSubsurf = user => {
           // hydrate preview
           g('headline').textContent = v.headline
           g('lede').textContent = v.lede
+          if (v.image) g('image').src = v.image
 
           setCSS(`#preview { color: ${v.color}; }
           button, .badge, #footer { background: ${v.color}; }`)
@@ -165,6 +166,7 @@ const renderGenerateButton = user => {
           role: 'user',
           content: `Return a single JSON object copying this schema: ${JSON.stringify({
             color: 'hex value for trendy, relevant light brand color',
+            dalle_prompt: 'prompt for DALL-E to generate a relevant image that includes "minimalist spot illustration"',
             headline: 'clever, pithy headline to be displayed in large bold type at top of home page',
             lede: ' lede immediately after headline',
             services: 'a comma-delimited list of 12 relevant services',
@@ -173,8 +175,8 @@ const renderGenerateButton = user => {
         },
       ]).then(text => {
         const json = toJSON(text)
-        const { color, headline, lede, services, services_h2 } = json
-        userRef.push({
+        const { color, dalle_prompt, headline, lede, services, services_h2 } = json
+        const versionRef = userRef.push({
           base_prompt,
           business_name,
           color,
@@ -185,6 +187,7 @@ const renderGenerateButton = user => {
           services_h2,
           version,
         })
+        image(dalle_prompt).then(text => versionRef.update({ image: text }))
         generateButton.disabled = false
         document.body.classList.remove('loading')
       })
@@ -223,6 +226,18 @@ const toJSON = str => {
     else if (c === '}' || c === ']') count--
   }
   if (!count) return JSON.parse(str.slice(str.indexOf(first), str.lastIndexOf(last) + 1))
+}
+
+const image = async prompt => {
+  // console.log('Fetching image…', prompt)
+  const response = await fetch(`https://us-central1-samantha-374622.cloudfunctions.net/dalle`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ prompt }),
+  })
+  return response.text()
 }
 
 // temporary client-side DOM edits, needs SSR

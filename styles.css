@@ -234,6 +234,10 @@ section {
 
 /* preview */
 
+#preview img {
+  border-radius: 2rem;
+}
+
 #preview ul {
   list-style-type: none;
   padding: 0;
