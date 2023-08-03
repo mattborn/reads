@@ -12,14 +12,41 @@ const app = firebase.initializeApp({
 })
 // Firebase Analytics is automatically initialized
 
+// init
+
+dayjs.extend(dayjs_plugin_isoWeek)
+dayjs.extend(dayjs_plugin_isLeapYear)
+
+const generateWeeks = year => {
+  const weeks = {}
+  const thisWeek = dayjs().isoWeek()
+  Array.from({ length: dayjs(`${year}-12-31`).isoWeek() }, (_, i) => {
+    i = i + 1
+    const week = year.toString().slice(-2) + String(i).padStart(2, '0')
+    weeks[week] = {
+      test: dayjs().year(year).isoWeek(i).endOf('isoWeek').format('YYYY-MM-DD'),
+      when: i < thisWeek ? 'past' : i === thisWeek ? 'present' : 'future',
+    }
+  })
+  return weeks
+}
+
+// utilities
+
 const insert = (target = document.body, tag = 'div') => {
   const el = document.createElement(tag)
   target.appendChild(el)
   return el
 }
 
+// auth
+
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
+    // clear auth DOM elements
+    g('firebase-ui-auth').innerHTML = ''
+    document.body.classList.remove('hide-app')
+
     if (user.isAnonymous) {
       g('account-name').textContent = 'Anonymous'
       g('account-id').textContent = user.uid
@@ -76,32 +103,60 @@ const initRootUser = user => {
     })
     .catch(console.error)
 
-  userRef.child('apps').update({ reads: true }) // auto provision
+  userRef.child('apps').update({ reads: true }).catch(console.error) // auto provision
 
-  initReads(user)
+  initApp(user)
 }
 
-const initReads = user => {
+const initApp = user => {
+  // scaffold weeks if user has none OR update past/present/future every time
+  const weeks = generateWeeks(dayjs().year())
+  database.ref(`reads/${user.uid}`).update(weeks).catch(console.error)
+
   database.ref(`reads/${user.uid}`).on('value', snapshot => {
-    const weeks = snapshot.val() || []
-    g('list').innerHTML = '' // clear list
-    console.log(Object.values(weeks))
-    Object.values(weeks)
-      // .sort((a, b) => b.created - a.created)
-      .forEach((b, i) => {
-        // hydrate list
-        // version.addEventListener('click', e => {
-        // highlight active
-        // q('.version').forEach(el => el.classList.remove('active'))
-        // version.classList.add('active')
-        // hydrate form
-        // })
-      })
+    const list = snapshot.val() || []
+    g('weeks').innerHTML = '' // clear list
+    const keys = Object.keys(list)
+    for (const item in list) {
+      const w = list[item]
+
+      // hydrate list
+      const row = insert(g('weeks'), 'tr')
+      row.className = w.when
+
+      const id = insert(row, 'td')
+      id.textContent = item
+
+      const book = insert(row, 'td')
+      book.textContent = 'title, author'
+
+      const medium = insert(row, 'td')
+      medium.textContent = 'physical, audible, internet, chatgpt'
+
+      const method = insert(row, 'td')
+      method.textContent = 'speed read, 2 hours, hack?'
+
+      const status = insert(row, 'td')
+      status.textContent = 'active?'
+
+      const review = insert(row, 'td')
+      review.textContent = 'url?'
+
+      if (keys.indexOf(item) === keys.length - 1) {
+        q('.present td')[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+    // .sort((a, b) => b.created - a.created)
+    // version.addEventListener('click', e => {
+    // highlight active
+    // q('.version').forEach(el => el.classList.remove('active'))
+    // version.classList.add('active')
+    // hydrate form
+    // })
   })
-
-  renderGenerateButton(user)
+  // renderGenerateButton(user)
 }
-
+/* HOLD
 // depends on user object
 const renderGenerateButton = user => {
   const generateButton = insert(g('actions'), 'button')
@@ -219,3 +274,5 @@ g('business_name').addEventListener('input', e => {
 
 const style = insert(document.head, 'style')
 const setCSS = css => (style.innerHTML = css)
+
+END HOLD */

@@ -11,11 +11,14 @@
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.js"></script>
     <script defer src="https://kit.fontawesome.com/0bef9420dc.js" crossorigin="anonymous"></script>
+    <script defer src="https://unpkg.com/dayjs/dayjs.min.js"></script>
+    <script defer src="https://unpkg.com/dayjs/plugin/isoWeek.js"></script>
+    <script defer src="https://unpkg.com/dayjs/plugin/isLeapYear.js"></script>
     <script defer src="https://unpkg.com/marked/marked.min.js"></script>
     <script defer src="https://unpkg.com/scrollreveal@4.0.7"></script>
     <script defer src="scripts.js"></script>
   </head>
-  <body>
+  <body class="hide-app">
     <header>
       <a class="brand" href="/">Reads</a>
       <div class="fill"></div>
@@ -28,21 +31,34 @@
       </div>
     </header>
     <div id="firebase-ui-auth"></div>
-    <div id="app">
-      <div id="list">
-        <!-- table vs. tiles -->
-      </div>
-      <div id="item">
-        <!-- form vs. view -->
-        <label for="week">Week</label>
-        <input id="week" type="number" />
-        <label for="author">Author</label>
-        <input id="author" />
-        <label for="title">Title</label>
-        <input id="title" />
-        <label for="parts">Parts</label>
-        <input id="parts" type="number" />
-        <button id="save">Save</button>
+    <div id="page">
+      <div id="app">
+        <div id="list">
+          <!-- table vs. tiles -->
+          <table>
+            <thead>
+              <th>Week</th>
+              <th>Book</th>
+              <th>Medium</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Review</th>
+            </thead>
+            <tbody id="weeks"></tbody>
+          </table>
+        </div>
+        <div id="item">
+          <!-- form vs. view -->
+          <label for="week">Week</label>
+          <input id="week" type="number" />
+          <label for="author">Author</label>
+          <input id="author" />
+          <label for="title">Title</label>
+          <input id="title" />
+          <label for="parts">Parts</label>
+          <input id="parts" type="number" />
+          <button id="save">Save</button>
+        </div>
       </div>
     </div>
   </body>
