@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Subsurf MVP</title>
+    <title>MB Reads</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css" />
     <link rel="stylesheet" href="styles.css" />
@@ -17,7 +17,7 @@
   </head>
   <body>
     <header>
-      <a class="brand" href="/">subsurf</a>
+      <a class="brand" href="/">Reads</a>
       <div class="fill"></div>
       <div id="account">
         <img alt="avatar" src="https://placehold.co/40" />
@@ -29,126 +29,20 @@
     </header>
     <div id="firebase-ui-auth"></div>
     <div id="app">
-      <div id="list"></div>
-      <div id="form">
-        <h5>Inputs</h5>
-        <label for="business_name">Business name</label>
-        <input id="business_name" placeholder="Brand" />
-        <label for="base_prompt">Describe your idea</label>
-        <textarea id="base_prompt" placeholder="Base prompt"></textarea>
-        <!-- <div>global stats (summary, progress, ai vs. human)</div>
-        <div>section by section forms (edit inputs, edit outputs)</div> -->
-        <div id="actions"></div>
+      <div id="list">
+        <!-- table vs. tiles -->
       </div>
-      <div id="preview">
-        <h5>Preview</h5>
-        <h3>Hero*</h3>
-        <section class="center">
-          <div class="brand">Brand</div>
-          <h1 id="headline">Headline</h1>
-          <p class="xl" id="lede">Lede</p>
-          <button>See plans</button>
-          <img alt="image" id="image" src="https://placehold.co/512" />
-        </section>
-        <h3>Services</h3>
-        <section class="center">
-          <div class="small-caps">Services</div>
-          <h2 id="services_h2">So, much, value, and more</h2>
-          <ul id="services"></ul>
-        </section>
-        <h3>Pricing</h3>
-        <section class="center" id="pricing">
-          <div class="small-caps">Pricing</div>
-          <h2>Membership levels</h2>
-          <p class="xl">Choose a plan that’s right for you.</p>
-          <div id="plans">
-            <div class="plan">
-              <div class="badge" style="visibility: hidden">Most popular</div>
-              <div>
-                <h4>Starter</h4>
-                <p>No stress or commitment. <br />Pause or cancel anytime.</p>
-              </div>
-              <div>
-                <small>Starting at</small>
-                <h4>$249/m</h4>
-                <small>Pause or cancel anytime.</small>
-              </div>
-              <div class="actions">
-                <a class="button" href="https://melio.me" target="_blank">Get started</a>
-                <a href="https://calendly.com" target="_blank">Book a call</a>
-              </div>
-              <div>
-                <b>What’s included</b>
-                <ul>
-                  <li>Unlimited users</li>
-                  <li>Easy credit-card payments</li>
-                  <li>Pause or cancel anytime</li>
-                </ul>
-              </div>
-            </div>
-            <div class="plan">
-              <div class="badge">Most popular</div>
-              <div>
-                <h4>Standard</h4>
-                <p>No stress or commitment. <br />Pause or cancel anytime.</p>
-              </div>
-              <div>
-                <small>Starting at</small>
-                <h4>$499/m</h4>
-                <small>Pause or cancel anytime.</small>
-              </div>
-              <div class="actions">
-                <a class="button" href="https://melio.me" target="_blank">Get started</a>
-                <a href="https://calendly.com" target="_blank">Book a call</a>
-              </div>
-              <div>
-                <b>What’s included</b>
-                <ul>
-                  <li>Unlimited users</li>
-                  <li>Easy credit-card payments</li>
-                  <li>Pause or cancel anytime</li>
-                </ul>
-              </div>
-            </div>
-            <div class="plan">
-              <div class="badge" style="visibility: hidden">Most popular</div>
-              <div>
-                <h4>Pro</h4>
-                <p>No stress or commitment. <br />Pause or cancel anytime.</p>
-              </div>
-              <div>
-                <small>Starting at</small>
-                <h4>$749/m</h4>
-                <small>Pause or cancel anytime.</small>
-              </div>
-              <div class="actions">
-                <a class="button" href="https://melio.me" target="_blank">Get started</a>
-                <a href="https://calendly.com" target="_blank">Book a call</a>
-              </div>
-              <div>
-                <b>What’s included</b>
-                <ul>
-                  <li>Unlimited users</li>
-                  <li>Easy credit-card payments</li>
-                  <li>Pause or cancel anytime</li>
-                </ul>
-              </div>
-            </div>
-            <div class="plan">
-              <i class="fa-light fa-comments-alt"></i>
-              <div>
-                <h4>Book a call</h4>
-                <p>Learn more about how we work and how it can help you.</p>
-                <a href="https://calendly.com" target="_blank">Book a call</a>
-              </div>
-            </div>
-          </div>
-        </section>
-        <h3>Footer</h3>
-        <section class="center" id="footer">
-          <div class="brand">Brand</div>
-          <p>is headquartered on planet Earth.</p>
-        </section>
+      <div id="item">
+        <!-- form vs. view -->
+        <label for="week">Week</label>
+        <input id="week" type="number" />
+        <label for="author">Author</label>
+        <input id="author" />
+        <label for="title">Title</label>
+        <input id="title" />
+        <label for="parts">Parts</label>
+        <input id="parts" type="number" />
+        <button id="save">Save</button>
       </div>
     </div>
   </body>

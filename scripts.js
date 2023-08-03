@@ -43,11 +43,7 @@ firebase.auth().onAuthStateChanged(user => {
     const ui = new firebaseui.auth.AuthUI(firebase.auth())
     ui.start('#firebase-ui-auth', {
       signInSuccessUrl: '/',
-      signInOptions: [
-        firebase.auth.PhoneAuthProvider.PROVIDER_ID,
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      ],
+      signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
     })
 
     const anonButton = insert(g('firebase-ui-auth'), 'button')
@@ -80,51 +76,26 @@ const initRootUser = user => {
     })
     .catch(console.error)
 
-  userRef.child('apps').update({ subsurf: true })
+  userRef.child('apps').update({ reads: true }) // auto provision
 
-  initSubsurf(user)
+  initReads(user)
 }
 
-const initSubsurf = user => {
-  database.ref(`subsurf/${user.uid}`).on('value', snapshot => {
-    const versions = snapshot.val() || []
+const initReads = user => {
+  database.ref(`reads/${user.uid}`).on('value', snapshot => {
+    const weeks = snapshot.val() || []
     g('list').innerHTML = '' // clear list
-    // console.log(Object.values(versions))
-    Object.values(versions)
-      .sort((a, b) => b.created - a.created)
-      .forEach((v, i) => {
-        const business_name = v.business_name || 'Untitled'
-
-        const version = insert(g('list'))
-        version.className = 'version'
-        const version_name = insert(version)
-        version_name.className = 'version-name'
-        version_name.textContent = `${business_name} ${v.version}`
-        version.addEventListener('click', e => {
-          // highlight active
-          q('.version').forEach(el => el.classList.remove('active'))
-          version.classList.add('active')
-          // hydrate form
-          g('business_name').value = business_name
-          g('business_name').dispatchEvent(new Event('input', { bubbles: true }))
-          g('base_prompt').value = v.base_prompt
-          g('base_prompt').dispatchEvent(new Event('input', { bubbles: true }))
-          // hydrate preview
-          g('headline').textContent = v.headline
-          g('lede').textContent = v.lede
-          if (v.image) g('image').src = v.image
-
-          setCSS(`#preview { color: ${v.color}; }
-          button, .badge, #footer { background: ${v.color}; }`)
-
-          g('services').innerHTML = ''
-          v.services.split(',').forEach(s => {
-            const li = insert(g('services'), 'li')
-            li.textContent = s
-          })
-          g('services_h2').textContent = v.services_h2
-        })
-        if (!i) version.click()
+    console.log(Object.values(weeks))
+    Object.values(weeks)
+      // .sort((a, b) => b.created - a.created)
+      .forEach((b, i) => {
+        // hydrate list
+        // version.addEventListener('click', e => {
+        // highlight active
+        // q('.version').forEach(el => el.classList.remove('active'))
+        // version.classList.add('active')
+        // hydrate form
+        // })
       })
   })
 
