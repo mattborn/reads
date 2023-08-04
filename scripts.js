@@ -17,12 +17,18 @@ const app = firebase.initializeApp({
 dayjs.extend(dayjs_plugin_isoWeek)
 dayjs.extend(dayjs_plugin_isLeapYear)
 
+const formatYearWeek = (year, week) => {
+  return String(year).slice(-2) + String(week).padStart(2, '0')
+}
+
+const currentWeek = formatYearWeek(dayjs().year(), dayjs().isoWeek())
+
 const generateWeeks = year => {
   const weeks = {}
   const thisWeek = dayjs().isoWeek()
   Array.from({ length: dayjs(`${year}-12-31`).isoWeek() }, (_, i) => {
     i = i + 1
-    const week = year.toString().slice(-2) + String(i).padStart(2, '0')
+    const week = formatYearWeek(year, i)
     weeks[week] = {
       test: dayjs().year(year).isoWeek(i).endOf('isoWeek').format('YYYY-MM-DD'),
       when: i < thisWeek ? 'past' : i === thisWeek ? 'present' : 'future',
@@ -109,12 +115,27 @@ const initRootUser = user => {
 }
 
 const initApp = user => {
-  // scaffold weeks if user has none OR update past/present/future every time
-  const weeks = generateWeeks(dayjs().year())
-  database.ref(`reads/${user.uid}`).update(weeks).catch(console.error)
+  const ref = database.ref(`reads/${user.uid}`)
+  ref.on('value', snapshot => {
+    const list = snapshot.val()
 
-  database.ref(`reads/${user.uid}`).on('value', snapshot => {
-    const list = snapshot.val() || []
+    if (!list) {
+      // scaffold weeks if user has none
+      const weeks = generateWeeks(dayjs().year())
+      ref.update(weeks).catch(console.error)
+    } else {
+      // OR update only past/present/future
+      const updates = {}
+      for (const [week, details] of Object.entries(weeks)) {
+        if (list[week]) {
+          updates[`${week}/when`] = details.when
+        }
+      }
+      if (Object.keys(updates).length > 0) {
+        ref.update(updates).catch(console.error)
+      }
+    }
+
     g('weeks').innerHTML = '' // clear list
     const keys = Object.keys(list)
     for (const item in list) {
@@ -126,26 +147,61 @@ const initApp = user => {
 
       const id = insert(row, 'td')
       id.textContent = item
+      if (w.when === 'present') {
+        const outline = insert(id)
+        outline.id = 'outline'
+      }
 
       const book = insert(row, 'td')
-      book.textContent = 'title, author'
+      const title = insert(book)
+      title.textContent = w.title || ''
+      const author = insert(book)
+      author.textContent = w.author || ''
 
       const medium = insert(row, 'td')
-      medium.textContent = 'physical, audible, internet, chatgpt'
+      medium.textContent = w.medium || '' //'physical, audible, internet, chatgpt'
 
       const method = insert(row, 'td')
-      method.textContent = 'speed read, 2 hours, hack?'
+      method.textContent = w.method || '' //'speed read, 2 hours, hack?'
 
       const status = insert(row, 'td')
-      status.textContent = 'active?'
+      status.textContent = w.status || ''
 
-      const review = insert(row, 'td')
-      review.textContent = 'url?'
+      const notes = insert(row, 'td')
+      notes.textContent = w.notes || ''
 
       if (keys.indexOf(item) === keys.length - 1) {
-        q('.present td')[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setOutlineWidth()
+        showThisWeek()
       }
     }
+
+    // init form
+    let defaultWeek = currentWeek
+    database.ref(`reads/${user.uid}/${currentWeek}`).once('value', snapshot => {
+      if (snapshot.exists() && snapshot.val().title) {
+        defaultWeek++
+      }
+      g('week').value = defaultWeek
+    })
+
+    // bind save
+    g('save').addEventListener('click', e => {
+      const week = g('week').value
+      const title = g('title').value
+      const author = g('author').value
+      const physical = g('physical').checked
+      const parts = g('parts').value
+      const notes = g('parts').value
+
+      database.ref(`reads/${user.uid}/${week}`).update({
+        author,
+        notes,
+        parts,
+        physical,
+        title,
+      })
+    })
     // .sort((a, b) => b.created - a.created)
     // version.addEventListener('click', e => {
     // highlight active
@@ -154,125 +210,28 @@ const initApp = user => {
     // hydrate form
     // })
   })
-  // renderGenerateButton(user)
-}
-/* HOLD
-// depends on user object
-const renderGenerateButton = user => {
-  const generateButton = insert(g('actions'), 'button')
-  generateButton.textContent = 'Generate'
-  generateButton.addEventListener('click', e => {
-    const business_name = g('business_name').value
-    const base_prompt = g('base_prompt').value
-    generateButton.disabled = true
-    document.body.classList.add('loading')
-
-    const userRef = database.ref(`subsurf/${user.uid}`)
-    // get next version number
-    let version = 1
-    userRef
-      .orderByChild('business_name')
-      .equalTo(business_name)
-      .limitToLast(1)
-      .once('value')
-      .then(snapshot => {
-        snapshot.forEach(child => {
-          const match = child.val()
-          version = (match.version || 0) + 1
-        })
-      })
-
-    try {
-      turbo([
-        {
-          role: 'system',
-          content: `Generate content for a website about ${base_prompt}`,
-        },
-        {
-          role: 'user',
-          content: `Return a single JSON object copying this schema: ${JSON.stringify({
-            color: 'hex value for trendy, relevant light brand color',
-            dalle_prompt: 'prompt for DALL-E to generate a relevant image that includes "minimalist spot illustration"',
-            headline: 'clever, pithy headline to be displayed in large bold type at top of home page',
-            lede: ' lede immediately after headline',
-            services: 'a comma-delimited list of 12 relevant services',
-            services_h2: 'repeat three services each as one word as a list ending with and more',
-          })} and use the values as hints.`,
-        },
-      ]).then(text => {
-        const json = toJSON(text)
-        const { color, dalle_prompt, headline, lede, services, services_h2 } = json
-        const versionRef = userRef.push({
-          base_prompt,
-          business_name,
-          color,
-          created: Date.now(),
-          headline,
-          lede,
-          services,
-          services_h2,
-          version,
-        })
-        image(dalle_prompt).then(text => versionRef.update({ image: text }))
-        generateButton.disabled = false
-        document.body.classList.remove('loading')
-      })
-    } catch (error) {
-      console.error(error)
-    }
-  })
 }
 
-// manage
-
-const turbo = async messages => {
-  // console.log('Fetching data…', messages)
-  const response = await fetch(`https://us-central1-samantha-374622.cloudfunctions.net/turbo`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(messages),
-  })
-  return response.text()
+const showThisWeek = () => {
+  q('.present td')[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
-const toJSON = str => {
-  const curly = str.indexOf('{')
-  const square = str.indexOf('[')
-  let first
-  if (curly < 0) first = '[' // only for empty arrays
-  else if (square < 0) first = '{'
-  else first = curly < square ? '{' : '['
-  const last = first === '{' ? '}' : ']'
-  // ensure JSON is complete
-  let count = 0
-  for (const c of str) {
-    if (c === '{' || c === '[') count++
-    else if (c === '}' || c === ']') count--
+/* hacks */
+
+const setOutlineWidth = () => {
+  g('outline').style.width = `${g('list').offsetWidth}px`
+}
+
+const debounce = (func, wait) => {
+  let timeout
+  return function () {
+    const context = this
+    const args = arguments
+    clearTimeout(timeout)
+    timeout = setTimeout(() => func.apply(context, args), wait)
   }
-  if (!count) return JSON.parse(str.slice(str.indexOf(first), str.lastIndexOf(last) + 1))
 }
 
-const image = async prompt => {
-  // console.log('Fetching image…', prompt)
-  const response = await fetch(`https://us-central1-samantha-374622.cloudfunctions.net/dalle`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ prompt }),
-  })
-  return response.text()
-}
+window.addEventListener('resize', debounce(setOutlineWidth, 500))
 
-// temporary client-side DOM edits, needs SSR
-
-g('business_name').addEventListener('input', e => {
-  q('section .brand').forEach(el => (el.textContent = e.currentTarget.value))
-})
-
-const style = insert(document.head, 'style')
-const setCSS = css => (style.innerHTML = css)
-
-END HOLD */
+g('jump').addEventListener('click', e => showThisWeek())

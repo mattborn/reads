@@ -37,28 +37,50 @@
           <!-- table vs. tiles -->
           <table>
             <thead>
-              <th>Week</th>
-              <th>Book</th>
-              <th>Medium</th>
-              <th>Method</th>
-              <th>Status</th>
-              <th>Review</th>
+              <tr>
+                <th>Week</th>
+                <th>Book</th>
+                <th>Medium</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>Review</th>
+              </tr>
             </thead>
             <tbody id="weeks"></tbody>
           </table>
         </div>
         <div id="item">
           <!-- form vs. view -->
-          <label for="week">Week</label>
-          <input id="week" type="number" />
-          <label for="author">Author</label>
-          <input id="author" />
-          <label for="title">Title</label>
-          <input id="title" />
-          <label for="parts">Parts</label>
-          <input id="parts" type="number" />
-          <button id="save">Save</button>
+          <form>
+            <h2>Form</h2>
+            <div>
+              <label for="week">Week</label>
+              <input id="week" type="number" />
+            </div>
+            <div>
+              <label for="title">Title</label>
+              <input id="title" />
+            </div>
+            <div>
+              <label for="author">Author</label>
+              <input id="author" />
+            </div>
+            <div>
+              <input id="physical" type="checkbox" />
+              <label for="physical">Physical</label>
+            </div>
+            <div>
+              <label for="parts">Parts</label>
+              <input id="parts" type="number" />
+            </div>
+            <div>
+              <label for="parts">Notes</label>
+              <input id="parts" type="number" />
+            </div>
+            <button id="save">Save</button>
+          </form>
         </div>
+        <button id="jump">Go to this week</button>
       </div>
     </div>
   </body>
